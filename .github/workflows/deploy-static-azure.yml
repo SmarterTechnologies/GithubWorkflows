@@ -1,0 +1,52 @@
+name: Deploy to Azure Static Website
+on:
+  workflow_call:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      # Get IP address
+      - name: Get Public IP
+        id: ip
+        uses: haythem/public-ip@v1.2
+
+      # Login to Azure
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ env.AZURE_STORAGE_SP_TOKEN }}
+
+      # Whitelist the IP address
+      - name: Set IP whitelist for this IP
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az storage account network-rule add -g ${{ env.AZURE_STORAGE_RG_NAME }} --account-name ${{ env.AZURE_STORAGE_ACCOUNT_NAME }} --ip-address ${{ steps.ip.outputs.ipv4 }}
+
+      # Sleep to allow network rule to propagate
+      - name: Sleep for 60s
+        run: sleep 60s
+        shell: bash
+
+      # Clear blob storage
+      - name: Delete blob storage contents
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az storage blob delete-batch -s '$web' --account-name ${{ env.AZURE_STORAGE_NAME }}
+
+      # Upload to $web container
+      - name: Upload to blob storage
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az storage blob upload-batch --account-name ${{ env.AZURE_STORAGE_NAME }} -d '$web' -s ${{ env.FOLDER_NAME }}
+
+      # Sign out of Azure
+      - name: Logout of Azure
+        run: az logout
+        if: always()
