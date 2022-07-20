@@ -19,7 +19,7 @@ jobs:
           creds: ${{ env.AZURE_STORAGE_SP_TOKEN }}
 
       # Whitelist the IP address - if prod branch
-      - name: Set IP whitelist for this IP
+      - name: Set IP whitelist for this IP (Prod Only)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: azure/CLI@v1
         with:
@@ -27,8 +27,8 @@ jobs:
             az storage account network-rule add -g ${{ env.AZURE_STORAGE_RG_NAME }} --account-name ${{ env.AZURE_STORAGE_ACCOUNT_NAME }} --ip-address ${{ steps.ip.outputs.ipv4 }}
 
       # Sleep to allow network rule to propagate - if prod branch
-      - name: Sleep for 60s
-        if: github.ref == 'refs/heads/main' github.ref == 'refs/heads/master'
+      - name: Sleep for 60s (Prod Only)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         run: sleep 60s
         shell: bash
 
