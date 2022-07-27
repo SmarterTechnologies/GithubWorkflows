@@ -2,10 +2,6 @@ name: Deploy to Azure Static Website
 on:
   workflow_call:
     inputs:
-      token:
-        description: "The service principal token to use as the credential"
-        required: true
-        type: string
       resource-group:
         description: "The name of the Azure resource group"
         required: false
@@ -35,7 +31,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ inputs.token }}
+          creds: ${{ env.token }}
 
       # Whitelist the IP address - if prod branch
       - name: Set IP whitelist for this IP (Prod Only)
