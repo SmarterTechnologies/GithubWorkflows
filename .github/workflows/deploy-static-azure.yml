@@ -1,6 +1,25 @@
 name: Deploy to Azure Static Website
 on:
   workflow_call:
+    inputs:
+      token:
+        description: "The service principal token to use as the credential"
+        required: true
+        type: string
+      resource-group:
+        description: "The name of the Azure resource group"
+        required: false
+        type: boolean
+      account-name:
+        description: "The storage account name"
+        required: true
+        type: string
+      folder-name:
+        description: "The name of the build output folder"
+        required: false
+        default: "dist"
+        type: string
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -16,7 +35,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ env.AZURE_STORAGE_SP_TOKEN }}
+          creds: ${{ inputs.token }}
 
       # Whitelist the IP address - if prod branch
       - name: Set IP whitelist for this IP (Prod Only)
@@ -24,7 +43,7 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az storage account network-rule add -g ${{ env.AZURE_STORAGE_RG_NAME }} --account-name ${{ env.AZURE_STORAGE_ACCOUNT_NAME }} --ip-address ${{ steps.ip.outputs.ipv4 }}
+            az storage account network-rule add -g ${{ inputs.resource-group }} --account-name ${{ inputs.account-name }} --ip-address ${{ steps.ip.outputs.ipv4 }}
 
       # Sleep to allow network rule to propagate - if prod branch
       - name: Sleep for 60s (Prod Only)
@@ -38,7 +57,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            az storage blob delete-batch -s '$web' --account-name ${{ env.AZURE_STORAGE_NAME }}
+            az storage blob delete-batch -s '$web' --account-name ${{ inputs.account-name }}
 
       # Upload to $web container
       - name: Upload to blob storage
@@ -46,7 +65,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            az storage blob upload-batch --account-name ${{ env.AZURE_STORAGE_NAME }} -d '$web' -s ${{ env.FOLDER_NAME }}
+            az storage blob upload-batch --account-name ${{ inputs.account-name }} -d '$web' -s ${{ inputs.folder-name }}
 
       # Sign out of Azure
       - name: Logout of Azure
