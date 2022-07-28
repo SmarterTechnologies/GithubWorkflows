@@ -64,7 +64,8 @@ jobs:
           inlineScript: |
             az storage blob upload-batch --account-name ${{ inputs.account-name }} -d '$web' -s ${{ inputs.folder-name }}
 
-      - name: Remove IP from whitelist - if prod
+      # Remove the IP from list - if prod branch
+      - name: Remove IP from whitelist
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: azure/CLI@v1
         with:
