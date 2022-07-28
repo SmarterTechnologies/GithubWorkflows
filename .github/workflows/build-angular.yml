@@ -14,5 +14,5 @@ jobs:
       - name: npm install and build
         run: |
           sudo npm install -g @angular/cli
-          npm install
+          npm install --force
           ng build
