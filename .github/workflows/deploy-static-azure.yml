@@ -5,7 +5,7 @@ on:
       resource-group:
         description: "The name of the Azure resource group"
         required: false
-        type: boolean
+        type: string
       account-name:
         description: "The storage account name"
         required: true
@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      # Get IP address - if prod branch
+      # Get IP address - if prod
       - name: Get Public IP
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         id: ip
