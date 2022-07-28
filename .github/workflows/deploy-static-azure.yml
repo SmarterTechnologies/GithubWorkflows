@@ -70,7 +70,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            az storage account network-rule remove -g smartview-prod-rg --account-name sviewpdashsta01 --ip-address ${{ steps.ip.outputs.ipv4 }}
+            az storage account network-rule remove -g ${{ inputs.resource-group }} --account-name ${{ inputs.account-name }} --ip-address ${{ steps.ip.outputs.ipv4 }}
 
       # Sign out of Azure
       - name: Logout of Azure
