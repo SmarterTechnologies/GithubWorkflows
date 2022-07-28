@@ -5,7 +5,7 @@ on:
       resource-group:
         description: "The name of the Azure resource group"
         required: false
-        type: boolean
+        type: string
       account-name:
         description: "The storage account name"
         required: true
