@@ -15,6 +15,9 @@ on:
         required: false
         default: "dist"
         type: string
+    secrets:
+      token:
+        required: true
 
 jobs:
   deploy:
@@ -32,7 +35,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ env.token }}
+          creds: ${{ secrets.token }}
 
       # Whitelist the IP address - if prod branch
       - name: Set IP whitelist for this IP (Prod Only)
@@ -64,7 +67,8 @@ jobs:
           inlineScript: |
             az storage blob upload-batch --account-name ${{ inputs.account-name }} -d '$web' -s ${{ inputs.folder-name }}
 
-      - name: Remove IP from whitelist - if prod
+      # Remove the IP from list - if prod branch
+      - name: Remove IP from whitelist
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: azure/CLI@v1
         with:
