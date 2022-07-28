@@ -5,7 +5,7 @@ on:
       resource-group:
         description: "The name of the Azure resource group"
         required: false
-        type: boolean
+        type: string
       account-name:
         description: "The storage account name"
         required: true
@@ -22,8 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      # Get IP address
+      # Get IP address - if prod
       - name: Get Public IP
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         id: ip
         uses: haythem/public-ip@v1.2
 
@@ -62,6 +63,14 @@ jobs:
           azcliversion: latest
           inlineScript: |
             az storage blob upload-batch --account-name ${{ inputs.account-name }} -d '$web' -s ${{ inputs.folder-name }}
+
+      - name: Remove IP from whitelist - if prod
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az storage account network-rule remove -g ${{ inputs.resource-group }} --account-name ${{ inputs.account-name }} --ip-address ${{ steps.ip.outputs.ipv4 }}
 
       # Sign out of Azure
       - name: Logout of Azure
