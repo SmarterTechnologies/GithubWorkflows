@@ -60,7 +60,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            az storage blob upload-batch --account-name ${{ inputs.account-name }} -d '$web' -s 'dist'
+            az storage blob upload-batch --account-name ${{ inputs.account-name }} -d '$web' -s dist
 
       # Remove the IP from list - if prod branch
       - name: Remove IP from whitelist
