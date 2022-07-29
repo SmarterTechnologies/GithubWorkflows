@@ -1,6 +1,7 @@
 name: Build Angular App
 on:
   workflow_call:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,3 +17,8 @@ jobs:
           sudo npm install -g @angular/cli
           npm install --force
           ng build
+      - name: Upload build output to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
