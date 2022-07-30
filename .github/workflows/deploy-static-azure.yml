@@ -10,10 +10,6 @@ on:
         description: "The storage account name"
         required: true
         type: string
-      download-path:
-        description: "This should match the download-path from build step"
-        required: true
-        type: string
     secrets:
       token:
         required: true
@@ -56,7 +52,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: dist
-          path: ${{ inputs.download-path }}
           if-no-files-found: error
 
       # Clear blob storage if build folder exists

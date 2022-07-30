@@ -1,11 +1,6 @@
 name: Build Angular App
 on:
   workflow_call:
-    inputs:
-      download-path:
-        description: "The download path for the source folder"
-        required: true
-        type: string
 
 jobs:
   build:
@@ -28,5 +23,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: dist
-          path: ${{ inputs.download-path }}
           retention-days: 1
