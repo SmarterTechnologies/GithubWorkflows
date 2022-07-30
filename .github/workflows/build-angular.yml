@@ -1,6 +1,11 @@
 name: Build Angular App
 on:
   workflow_call:
+    inputs:
+      download-path:
+        description: "The download path for the source folder"
+        required: true
+        type: string
 
 jobs:
   build:
@@ -17,8 +22,11 @@ jobs:
           sudo npm install -g @angular/cli
           npm install --force
           ng build
+
+      # keep upload for 1 day
       - name: Upload build output to artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dist
-          path: dist
+          path: ${{ inputs.download-path }}
+          retention-days: 1

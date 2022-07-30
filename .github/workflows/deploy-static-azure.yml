@@ -10,6 +10,10 @@ on:
         description: "The storage account name"
         required: true
         type: string
+      download-path:
+        description: "This should match the download-path from build step"
+        required: true
+        type: string
     secrets:
       token:
         required: true
@@ -46,16 +50,17 @@ jobs:
         run: sleep 60s
         shell: bash
 
+      # download source folder but error and exit if they don't exist
       - name: Download build output from artifacts
         id: build-folder
         uses: actions/download-artifact@v3
         with:
           name: dist
-          path: dist
+          path: ${{ inputs.download-path }}
+          if-no-files-found: error
 
       # Clear blob storage if build folder exists
       - name: Delete blob storage contents
-        if: build-folder
         uses: azure/CLI@v1
         with:
           azcliversion: latest
@@ -69,12 +74,6 @@ jobs:
           azcliversion: latest
           inlineScript: |
             az storage blob upload-batch --account-name ${{ inputs.account-name }} -d '$web' -s ${{ steps.build-folder.outputs.download-path }}
-
-      # Delete the build from artifacts
-      - name: Delete the build folder from artifacts
-      - uses: geekyeggo/delete-artifact@v1
-        with:
-          name: dist
 
       # Remove the IP from list - if prod branch
       - name: Remove IP from whitelist
