@@ -52,7 +52,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: dist
-          if-no-files-found: error
+          path: dist
 
       # Clear blob storage if build folder exists
       - name: Delete blob storage contents
