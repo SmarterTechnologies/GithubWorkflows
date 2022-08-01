@@ -46,7 +46,15 @@ jobs:
         run: sleep 60s
         shell: bash
 
-      # Clear blob storage
+      # download source folder but error and exit if they don't exist
+      - name: Download build output from artifacts
+        id: build-folder
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          if-no-files-found: error
+
+      # Clear blob storage if build folder exists
       - name: Delete blob storage contents
         uses: azure/CLI@v1
         with:
@@ -60,7 +68,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            az storage blob upload-batch --account-name ${{ inputs.account-name }} -d '$web' -s dist
+            az storage blob upload-batch --account-name ${{ inputs.account-name }} -d '$web' -s ${{ steps.build-folder.outputs.download-path }}
 
       # Remove the IP from list - if prod branch
       - name: Remove IP from whitelist
