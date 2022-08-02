@@ -1,6 +1,12 @@
 name: Build Angular App
 on:
   workflow_call:
+    inputs:
+      build-env:
+        required: false
+        type: string
+        description: "Test or Production"
+        default: test
 
 jobs:
   build:
@@ -16,7 +22,7 @@ jobs:
         run: |
           sudo npm install -g @angular/cli
           npm install --force
-          ng build
+          ng build -c ${{ inputs.build-env }}
 
       # keep upload for 1 day
       - name: Upload build output to artifacts
