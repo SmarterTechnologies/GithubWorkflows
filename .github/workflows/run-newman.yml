@@ -1,0 +1,34 @@
+name: Run Postman tests
+on:
+  workflow_call:
+    inputs:
+      collection:
+        required: true
+        type: string
+        description: "Path to Postman collection"
+      env:
+        required: true
+        type: string
+        description: "Path to Postman environment file"
+    secrets:
+      test-password:
+        required: true
+      
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js version
+        uses: actions/setup-node@v1
+        with:
+          node-version: "16.x"
+
+      - name: Install newman
+        run: npm install -g newman
+
+      - name: Run the API and Postman's tests
+        run: |
+          newman run ${{ inputs.collection }} -e ${{ inputs.env }} --env-var "password=${{ secrets.test-password }}" 

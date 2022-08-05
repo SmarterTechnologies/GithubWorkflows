@@ -1,0 +1,62 @@
+name: Build dotNET App
+on:
+  workflow_call:
+    inputs:
+      dotnet-core-version:
+        required: false
+        type: string
+        description: ".NET Core version"
+        default: 3.1.x
+      dotnet-core-version-inproc:
+        required: false
+        type: string
+        description: ".NET Core version inproc"
+        default: ""
+      configuration:
+        required: false
+        type: string
+        description: "Build configuration"
+        default: "Release"
+      working-directory:
+        required: true
+        type: string
+        description: "Working directory"
+    secrets:
+      azure-artifacts-pat:
+        required: true
+
+env:
+  OUTPUT_PATH: deployment/dist
+  NUGET_FEED_NAME: 'visionist-nuget'
+  AZURE_ARTIFACTS_FEED_URL: https://pkgs.dev.azure.com/VisionistLtd/Dev/_packaging/visionist-nuget/nuget/v3/index.json
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ inputs.dotnet-core-version }}
+    - name: Setup .NET Core (for inproc extensions)
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ inputs.dotnet-core-version-inproc }}
+    - name: Restore
+      run: |
+        dotnet nuget add source ${{ env.AZURE_ARTIFACTS_FEED_URL }} --name ${{ env.NUGET_FEED_NAME }} --username az --password ${{ secrets.azure-artifacts-pat }} --store-password-in-clear-text
+        dotnet restore "${{ inputs.working-directory }}"
+    - name: Build
+      run: dotnet build "${{ inputs.working-directory }}" --configuration ${{ inputs.configuration }} --no-restore
+    - name: Publish
+      run: dotnet publish "${{ inputs.working-directory }}" --configuration ${{ inputs.configuration }} --no-build --output "${{ env.OUTPUT_PATH }}"
+    
+    # keep upload for 1 day
+    - name: Upload build output to artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: ${{ env.OUTPUT_PATH }}
+        retention-days: 1
