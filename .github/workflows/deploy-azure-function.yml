@@ -1,5 +1,3 @@
-# TODO: Add support for deploying multiple apps
-
 name: Deploy to Azure Function
 on:
   workflow_call:

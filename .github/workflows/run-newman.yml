@@ -14,7 +14,6 @@ on:
       test-password:
         required: true
       
-
 jobs:
   test:
     runs-on: ubuntu-latest
