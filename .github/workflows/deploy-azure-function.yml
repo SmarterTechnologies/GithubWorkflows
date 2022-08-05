@@ -1,0 +1,66 @@
+name: Deploy to Azure Function
+on:
+  workflow_call:
+    inputs:
+      functionapp-name:
+        description: "The name of the function app"
+        required: true
+        type: string
+      resource-group:
+        description: "The name of the Azure resource group"
+        required: false
+        type: string
+      bicep-file:
+        description: "Path to bicep rules file"
+        type: string
+        default: ./infrastructure/addSecurityRestriction.bicep
+      
+    secrets:
+      token:
+        required: false
+      publish-profile:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      # Get IP address - if prod
+      - name: Get Public IP
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        id: ip
+        uses: haythem/public-ip@v1.2
+
+      # Login to Azure
+      - name: Azure Login
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.token }}
+
+      # Update security restriction if branch is main/master
+      - name: Bicep set security restriction
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az deployment group create -f ${{ inputs.bicep-file }} -g ${{ inputs.resource-group }} --parameters functionAppName=${{ inputs.functionapp-name }} ipAddress=${{ steps.ip.outputs.ipv4 }}
+
+      # Download build artifact
+      - name: Download build output from artifacts
+        id: build-folder
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+      # Upload to Azure Function App
+      - name: Deploy to Azure Function App
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ inputs.functionapp-name }}
+          publish-profile: ${{ secrets.publish-profile }}
+          package: dist
+
