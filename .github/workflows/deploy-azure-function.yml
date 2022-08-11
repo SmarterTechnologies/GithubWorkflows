@@ -46,7 +46,7 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az deployment group create -f ${{ inputs.bicep-file }} -g ${{ inputs.resource-group }} --parameters functionAppName=${{ inputs.functionapp-name }} ipAddress=${{ steps.ip.outputs.ipv4 }}
+            az deployment group create -f ${{ inputs.bicep-file }} -g ${{ inputs.resource-group }} -n "${{ inputs.functionapp-name }}-security-rules" -p functionAppName=${{ inputs.functionapp-name }} ipAddress=${{ steps.ip.outputs.ipv4 }}
 
       # Download build artifact
       - name: Download build output from artifacts
