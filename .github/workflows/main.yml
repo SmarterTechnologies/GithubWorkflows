@@ -42,6 +42,7 @@ jobs:
       
       #Create the deployment slot
     - name: Create slot
+      uses: azure/CLI@v1
       with:
         azcliversion: latest
         inlineScript: |
