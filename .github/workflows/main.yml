@@ -21,8 +21,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    outputs:
-      slot-name: ${{ steps.rename-branch-name.outputs.value }}
     steps:
       # Login to Azure
     - name: Azure Login
