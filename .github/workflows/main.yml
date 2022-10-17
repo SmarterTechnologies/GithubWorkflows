@@ -42,7 +42,10 @@ jobs:
       
       #Create the deployment slot
     - name: Create slot
-      run: az webapp deployment slot create --resource-group ${{ inputs.resource-group }}  --name ${{ inputs.web-app }} --slot ${{ steps.rename-branch-name.outputs.value }}
+      with:
+        azcliversion: latest
+        inlineScript: |
+          az webapp deployment slot create --resource-group ${{ inputs.resource-group }}  --name ${{ inputs.web-app }} --slot ${{ steps.rename-branch-name.outputs.value }}
       
      # Sign out of Azure
     - name: Logout of Azure
