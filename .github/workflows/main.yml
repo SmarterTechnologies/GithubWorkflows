@@ -10,6 +10,10 @@ on:
         description: "The name of the web app"
         required: true
         type: string
+      slot-name:
+        description: "The name of the deployment slot"
+        required: false
+        type: string
     secrets:
       token:
         required: true
@@ -26,27 +30,13 @@ jobs:
       with:
         creds: ${{ secrets.token }}
       
-      #Uses the current branch as the deployment slot name
-    - name: Get branch name
-      id: branch-name
-      uses: tj-actions/branch-names@v6
-      
-      #Remove feature and forward slash from name as its invalid
-    - name: Remove feature from branch name
-      id: rename-branch-name
-      uses: mad9000/actions-find-and-replace-string@2
-      with:
-        source: ${{ steps.branch-name.outputs.current_branch }}
-        find: 'feature/'
-        replace: ''
-      
       #Create the deployment slot
     - name: Create slot
       uses: azure/CLI@v1
       with:
         azcliversion: latest
         inlineScript: |
-          az webapp deployment slot create --resource-group ${{ inputs.resource-group }}  --name ${{ inputs.web-app }} --slot ${{ steps.rename-branch-name.outputs.value }}
+          az webapp deployment slot create --resource-group ${{ inputs.resource-group }}  --name ${{ inputs.web-app }} --slot ${{ inputs.slot-name }}
       
      # Sign out of Azure
     - name: Logout of Azure
