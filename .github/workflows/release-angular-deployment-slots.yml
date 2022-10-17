@@ -1,0 +1,43 @@
+name: Create Deployment Slot
+on:
+  workflow_call:
+    inputs:
+      web-app:
+        description: "The name of the web app"
+        required: true
+        type: string
+      slot-name:
+        description: "The name of the deployment slot"
+        required: false
+        type: string
+    secrets:
+      token:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: dist
+
+      - name: Log into Azure CLI with service principal
+        uses: azure/login@v1.1
+        with:
+          creds: ${{ secrets.token }}
+
+      - name: Deploy to slot on staging site
+        uses: azure/webapps-deploy@v1
+        id: deploy-to-webapp
+        with: 
+          app-name: ${{ inputs.web_app }}
+          slot-name:  ${{ inputs.slot_name }}
+          package: dist
+          
+       # Sign out of Azure
+      - name: Logout of Azure
+        run: az logout
+        if: always()
