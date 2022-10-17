@@ -33,8 +33,8 @@ jobs:
         uses: azure/webapps-deploy@v1
         id: deploy-to-webapp
         with: 
-          app-name: ${{ inputs.web_app }}
-          slot-name:  ${{ inputs.slot_name }}
+          app-name: ${{ inputs.web-app }}
+          slot-name:  ${{ inputs.slot-name }}
           package: dist
           
        # Sign out of Azure
