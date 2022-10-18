@@ -1,4 +1,4 @@
-name: Create Deployment Slot
+name: Deploy to a Deployment Slot
 on:
   workflow_call:
     inputs:
