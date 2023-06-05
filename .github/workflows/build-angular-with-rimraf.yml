@@ -1,0 +1,38 @@
+name: Build Angular App w/ rimraf
+on:
+  workflow_call:
+    inputs:
+      build-env:
+        required: false
+        type: string
+        description: "CI (dev) or CD (prod)"
+        default: ci
+
+env:
+  NODE_VERSION: "16.x"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Setup node
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          sudo npm i -g rimraf
+          sudo npm install -g @angular/cli
+          sudo npm i @angular-devkit/build-angular
+          npm run build:${{ inputs.build-env }}
+
+      # keep upload for 1 day
+      - name: Upload build output to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
+          retention-days: 1
