@@ -1,4 +1,4 @@
-name: Deploy live to Firebase Hosting
+name: Deploy preview to Firebase Hosting
 on:
   workflow_call:
     inputs:
@@ -6,6 +6,15 @@ on:
         description: "The project ID used in the Firebase project"
         required: true
         type: string
+      channel:
+        description: "The channel to deploy to"
+        required: false
+        type: string
+      expires:
+        description: "The time at which the preview expires"
+        required: false
+        type: string
+        default: "3d"
     secrets:
       service-account:
         required: true
@@ -30,4 +39,4 @@ jobs:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.service-account }}"
           projectId: ${{ inputs.project-id }}
-          channelId: live
+          channelId: ${{ inputs.channel }}
