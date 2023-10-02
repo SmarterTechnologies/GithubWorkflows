@@ -31,6 +31,7 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.token }}
+          allow-no-subscriptions: true
 
       # Whitelist the IP address - if prod branch
       - name: Set IP whitelist for this IP (Prod Only)
