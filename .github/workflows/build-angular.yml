@@ -8,9 +8,9 @@ on:
         description: "Test or Production"
         default: test
       node-version:
-        required: false
+        required: true
         type: string
-        description: "Test or Production"
+        description: "Node version"
         default: "16.x"
 
 jobs:
