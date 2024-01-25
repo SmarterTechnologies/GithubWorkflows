@@ -7,6 +7,11 @@ on:
         type: string
         description: "Test or Production"
         default: test
+      node-version:
+        required: false
+        type: string
+        description: "Test or Production"
+        default: "16.x"
 
 jobs:
   build:
@@ -17,7 +22,7 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v1
         with:
-          node-version: "16.x"
+          node-version: ${{ inputs.node-version }}
       - name: npm install and build
         run: |
           sudo npm install -g @angular/cli@16.2.10
