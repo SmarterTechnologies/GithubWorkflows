@@ -8,7 +8,7 @@ on:
         description: "Test or Production"
         default: test
       node-version:
-        required: true
+        required: false
         type: string
         description: "Node version"
         default: "16.x"
