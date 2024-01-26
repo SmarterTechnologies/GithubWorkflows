@@ -7,6 +7,16 @@ on:
         type: string
         description: "Test or Production"
         default: test
+      node-version:
+        required: false
+        type: string
+        description: "Node version"
+        default: "16.x"
+      angular-cli-version:
+        required: false
+        type: string
+        description: "Angular CLI version"
+        default: "16.2.10"
 
 jobs:
   build:
@@ -17,10 +27,10 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v1
         with:
-          node-version: "16.x"
+          node-version: ${{ inputs.node-version }}
       - name: npm install and build
         run: |
-          sudo npm install -g @angular/cli
+          sudo npm install -g @angular/cli@${{ inputs.angular-cli-version }}
           npm install --force
           ng build -c ${{ inputs.build-env }}
 

@@ -1,0 +1,45 @@
+name: Comment on Jira Ticket
+on:
+  workflow_call:
+    inputs:
+      ticketId:
+        description: "String containing ticket id"
+        required: true
+        type: string
+      jiraMessage:
+        description: "Message to write on Jira ticket"
+        required: true
+        type: string
+    secrets:
+      jiraUsername:
+        required: true
+      jiraHost:
+        required: true
+      jiraToken:
+        required: true
+
+jobs:
+  comment-on-jira-ticket:
+    name: Comment on Jira Ticket
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to Jira
+        uses: atlassian/gajira-login@master
+        env:
+          JIRA_BASE_URL: ${{ secrets.jiraHost }}
+          JIRA_USER_EMAIL: ${{ secrets.jiraUsername }}
+          JIRA_API_TOKEN: ${{ secrets.jiraToken }}
+
+      - name: Find Jira Tickets
+        id: find-jira-ticket
+        uses: atlassian/gajira-find-issue-key@master
+        with:
+          string: ${{ inputs.ticketId }}
+
+      - name: Comment on Jira ticket
+        uses: atlassian/gajira-comment@master
+        #Only comment on jira ticket if one has been found.§
+        if: ${{ steps.find-jira-ticket.outputs.issue }}
+        with:
+          issue: ${{ steps.find-jira-ticket.outputs.issue }}
+          comment: "*AUTOMATED MESSAGE* ${{inputs.jiraMessage}}"

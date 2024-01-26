@@ -45,7 +45,9 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: azure/CLI@v1
         with:
+          # 1st command is a workaround for https://github.com/Azure/azure-cli/issues/25710
           inlineScript: |
+            az config set bicep.use_binary_from_path=false
             az deployment group create -f ${{ inputs.bicep-file }} -g ${{ inputs.resource-group }} -n "${{ inputs.functionapp-name }}-security-rules" -p functionAppName=${{ inputs.functionapp-name }} ipAddress=${{ steps.ip.outputs.ipv4 }}
 
       # Download build artifact
