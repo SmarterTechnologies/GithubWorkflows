@@ -19,7 +19,7 @@ jobs:
         id: build-folder
         uses: actions/download-artifact@v3
         with:
-          name: functions/lib
+          name: firebase-functions
           path: functions/lib
 
         # Deploy to Firebase
