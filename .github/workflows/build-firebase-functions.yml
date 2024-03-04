@@ -27,5 +27,5 @@ jobs:
         with:
           # functions/lib
           name: lib
-          path: ./
+          path: lib
           retention-days: 1
