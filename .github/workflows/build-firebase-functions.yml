@@ -15,18 +15,14 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install npm packages
+      - name: Install npm packages and build functions
         run: |
           cd functions
           npm install --force
-      - name: Build Functions
-        run: |
           npm run build
       - name: Upload build output to artifacts
         uses: actions/upload-artifact@v3
         with:
-          # functions/lib
-          name: lib
-          path: lib
+          name: functions/lib
+          path: functions/lib
           retention-days: 1
