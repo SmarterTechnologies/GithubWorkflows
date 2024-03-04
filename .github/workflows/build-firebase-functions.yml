@@ -23,6 +23,6 @@ jobs:
       - name: Upload build output to artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: functions/lib
+          name: firebase-functions
           path: functions/lib
           retention-days: 1
