@@ -19,8 +19,8 @@ jobs:
         id: build-folder
         uses: actions/download-artifact@v3
         with:
-          name: lib
-          path: lib
+          name: functions/lib
+          path: functions/lib
 
         # Deploy to Firebase
       - name: Deploy to Firebase
