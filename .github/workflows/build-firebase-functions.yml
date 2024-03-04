@@ -1,34 +1,31 @@
 name: Build Firebase Functions
 on:
   workflow_call:
-      
 
 env:
   NODE_VERSION: "16.x"
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Use Node.js ${{ env.NODE_VERSION }}
-              uses: actions/setup-node@v2
-              with:
-                node-version: ${{ env.NODE_VERSION }}
-            
-            - name: Install npm packages
-              run: |
-                cd functions
-                npm install --force
-            - name: Build Functions
-              run: |    
-                npm run build
-            - name: Upload build output to artifacts
-              uses: actions/upload-artifact@v3
-              with: 
-                # functions/lib
-                name: lib
-                path: ./
-                retention-days: 1
+    steps:
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
-
+      - name: Install npm packages
+        run: |
+          cd functions/
+          npm install --force
+      - name: Build Functions
+        run: |
+          npm run build
+      - name: Upload build output to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          # functions/lib
+          name: lib
+          path: ./
+          retention-days: 1
