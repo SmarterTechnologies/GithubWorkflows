@@ -1,4 +1,4 @@
-name: Deploy Firebase Functions
+name: Build and Deploy Firebase Functions
 on:
   workflow_call:
     inputs:
@@ -10,19 +10,25 @@ on:
       gcp-sa-key:
         required: true
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      # Download build artifact
-      - name: Download build output from artifacts
-        id: build-folder
-        uses: actions/download-artifact@v3
-        with:
-          name: firebase-functions
-          path: functions/lib
+env:
+  NODE_VERSION: "16.x"
 
-        # Deploy to Firebase
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install npm packages and build functions
+        run: |
+          cd functions
+          npm install --force
+          npm run build
+      # Deploy to Firebase
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
         with:
