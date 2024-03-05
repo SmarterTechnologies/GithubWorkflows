@@ -1,0 +1,95 @@
+name: Deploy to Azure Function App Slot, named according to branch name
+
+on:
+  workflow_call:
+    inputs:
+      functionapp-name:
+        description: 'The name of the function app.'
+        required: true
+        type: string
+      resource-group:
+        required: true
+        type: string
+        description: 'The Azure resource group containing the Azure Function app.'
+    secrets:
+      azure-credentials:
+        required: true
+        description: 'Azure service principal credentials for login.'
+      jira-user-email:
+        required: true
+        description: 'Email of the Jira user for authentication.'
+      jira-base-url:
+        required: true
+        description: 'Base URL of the Jira instance.'
+      jira-api-token:
+        required: true
+        description: 'API token for the Jira user.'
+
+jobs:
+  setup:
+    name: Call Create Slot Name Workflow
+    uses: SmarterTechnologies/GithubWorkflows/.github/workflows/create-slot-name.yml@main
+    with:
+      webApp: ${{ inputs.functionapp-name }}
+  deploy:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Login to Azure
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          # passed in as a parameter
+          creds: ${{ secrets.azure-credentials }}
+
+      # Download the build directory (dist)
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+      # Debug: List files to verify artifact download
+      - name: Debug - List files in dist
+        run: ls -la dist        
+
+      # Create or update the deployment slot and deploy
+      - name: Deploy to Azure Function App Slot
+        run: |
+          az functionapp deployment slot create --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} || true
+          echo "Deployment slot ready: ${{ needs.setup.outputs.slot-name }}"
+
+      # Generate Publish Profile for the Function App Slot
+      - name: Generate Publish Profile
+        id: generate_publish_profile
+        run: |
+          PROFILE=$(az webapp deployment list-publishing-profiles --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} --xml)
+          echo "publish_profile=${PROFILE}" >> $GITHUB_OUTPUT
+        shell: bash
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.azure-credentials }}
+
+      # Deploy the artifact to the specified slot
+      - name: Deploy to Azure Function App Slot
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ inputs.functionapp-name }}
+          slot-name: ${{ needs.setup.outputs.slot-name }}
+          publish-profile: ${{ steps.generate_publish_profile.outputs.publish_profile }}
+          package: dist
+
+  comment-on-jira:
+    needs: [setup, deploy]
+    name: Comment on Jira ticket
+    uses: SmarterTechnologies/GithubWorkflows/.github/workflows/comment_on_jira_ticket.yml@main
+    with:
+      ticketId: ${{ github.ref_name }} # Dynamically sets the ticket ID to the branch name, e.g. "WP-3746"
+      jiraMessage: |
+        - *Preview link*: https://${{ inputs.functionapp-name }}-${{ needs.setup.outputs.slot-name }}.azurewebsites.net
+        - Changes have been deployed to the slot site.
+    secrets:
+      jiraUsername: ${{ secrets.jira-user-email }}
+      jiraHost: ${{ secrets.jira-base-url }}
+      jiraToken: ${{ secrets.jira-api-token }}
