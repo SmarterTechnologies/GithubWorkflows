@@ -32,4 +32,3 @@ jobs:
         with:
           stringToTruncate: ${{ steps.rename-branch-name.outputs.value }}
           maxLength: 42
-        run: echo $GITHUB_OUTPUT
