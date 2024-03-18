@@ -3,11 +3,13 @@ on:
   workflow_call:
     outputs:
       slot-name:
-        value: ${{ jobs.create-deployment-slot-name.steps.truncate-branch-name.outputs.string }}
+        value: ${{ jobs.create-deployment-slot-name.outputs.slot-name }}
 jobs:
   create-deployment-slot-name:
     name: Create deployment slot name
     runs-on: ubuntu-latest
+    outputs:
+      slot-name: ${{ steps.truncate-branch-name.outputs.string }}
     steps:
       #Uses the current branch as the deployment slot name
       - name: Get branch name
@@ -30,3 +32,4 @@ jobs:
         with:
           stringToTruncate: ${{ steps.rename-branch-name.outputs.value }}
           maxLength: 42
+        run: echo $GITHUB_OUTPUT
