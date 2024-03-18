@@ -1,0 +1,32 @@
+name: Get slot name from branch
+on:
+  workflow_call:
+    outputs:
+      slot-name:
+        value: ${{ jobs.create-deployment-slot-name.steps.truncate-branch-name.outputs.string }}
+jobs:
+  create-deployment-slot-name:
+    name: Create deployment slot name
+    runs-on: ubuntu-latest
+    steps:
+      #Uses the current branch as the deployment slot name
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+
+        #Remove forward slash from name as its invalid for deployment slot name.
+      - name: Remove feature from branch name
+        id: rename-branch-name
+        uses: mad9000/actions-find-and-replace-string@2
+        with:
+          source: ${{ steps.branch-name.outputs.current_branch }}
+          find: '/'
+          replace: '-'
+
+        # Truncate branch name if it's longer than 19 characters
+      - name: Truncate branch name
+        id: truncate-branch-name
+        uses: 2428392/gh-truncate-string-action@v1.2.0
+        with:
+          stringToTruncate: ${{ steps.rename-branch-name.outputs.value }}
+          maxLength: 42

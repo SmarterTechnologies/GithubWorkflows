@@ -1,0 +1,69 @@
+name: Deploy To Deployment Slot
+on:
+  workflow_call:
+    inputs:
+      buildEnv:
+        description: "Test or Production"
+        required: true
+        type: string
+      webApp:
+        description: "We App Name"
+        required: true
+        type: string
+      resourceGroup:
+        description: "Resource Group"
+        required: true
+        type: string
+    secrets:
+      azureCredentialsTestSlots:
+        required: true
+      jiraUserEmail:
+        required: true
+      jiraBaseUrl:
+        required: true
+      jiraApiToken:
+        required: true
+
+jobs:
+  create-slot-name:
+    uses: ./.github/workflows/create-slot-name.yml
+
+  build:
+    uses: ./.github/workflows/build-angular.yml
+    with:
+      build-env: ${{ inputs.buildEnv }}
+  #Only create slot once name identified
+  create-slot:
+    needs: [ create-slot-name ]
+    uses: ./.github/workflows/create-slot.yml
+    with:
+      resource-group: ${{ inputs.resourceGroup }}
+      web-app: ${{ inputs.webApp }}
+      slot-name: ${{ needs.create-slot-name.outputs.slot-name.value }}
+    secrets:
+      token: ${{ secrets.azureCredentialsTestSlots }}
+  #Release to deployment slot once created
+  release:
+    needs: [ create-slot-name, create-slot, build ]
+    name: Deploy to deployment slot
+    uses: ./.github/workflows/release-angular-deployment-slots.yml
+    with:
+      web-app: ${{ inputs.webApp }}
+      slot-name: ${{ needs.create-slot-name.outputs.slot-name.value }}
+    secrets:
+      token: ${{ secrets.azureCredentialsTestSlots }}
+  #Once release completed, comment on jira ticket if one is identified
+  comment-on-jira:
+    needs: [ create-slot-name, create-slot, release ]
+    name: Comment on Jira ticket
+    uses: ./.github/workflows/comment_on_jira_ticket.yml
+    with:
+      ticketId: ${{ needs.create-slot-name.outputs.slot-name.value }}
+      jiraMessage: |
+        - *Preview link*: https://${{ inputs.webApp }}-${{ needs.create-slot-name.outputs.slot-name.value }}.azurewebsites.net
+        - Changes have been deployed to the slot site.
+        - The preview link is shareable, but will be deleted when the branch is deleted.
+    secrets:
+      jiraUsername: ${{ secrets.jiraUserEmail }}
+      jiraHost: ${{ secrets.jiraBaseUrl }}
+      jiraToken: ${{ secrets.jiraApiToken }}
