@@ -39,7 +39,7 @@ jobs:
     with:
       resource-group: ${{ inputs.resourceGroup }}
       web-app: ${{ inputs.webApp }}
-      slot-name: ${{ needs.create-slot-name.outputs.slot-name.value }}
+      slot-name: ${{ needs.create-slot-name.outputs.slot-name }}
     secrets:
       token: ${{ secrets.azureCredentialsTestSlots }}
   #Release to deployment slot once created
@@ -49,7 +49,7 @@ jobs:
     uses: ./.github/workflows/release-angular-deployment-slots.yml
     with:
       web-app: ${{ inputs.webApp }}
-      slot-name: ${{ needs.create-slot-name.outputs.slot-name.value }}
+      slot-name: ${{ needs.create-slot-name.outputs.slot-name }}
     secrets:
       token: ${{ secrets.azureCredentialsTestSlots }}
   #Once release completed, comment on jira ticket if one is identified
@@ -58,9 +58,9 @@ jobs:
     name: Comment on Jira ticket
     uses: ./.github/workflows/comment_on_jira_ticket.yml
     with:
-      ticketId: ${{ needs.create-slot-name.outputs.slot-name.value }}
+      ticketId: ${{ needs.create-slot-name.outputs.slot-name }}
       jiraMessage: |
-        - *Preview link*: https://${{ inputs.webApp }}-${{ needs.create-slot-name.outputs.slot-name.value }}.azurewebsites.net
+        - *Preview link*: https://${{ inputs.webApp }}-${{ needs.create-slot-name.outputs.slot-name }}.azurewebsites.net
         - Changes have been deployed to the slot site.
         - The preview link is shareable, but will be deleted when the branch is deleted.
     secrets:

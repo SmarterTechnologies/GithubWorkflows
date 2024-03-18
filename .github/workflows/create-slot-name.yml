@@ -25,7 +25,7 @@ jobs:
           find: '/'
           replace: '-'
 
-        # Truncate branch name if it's longer than 19 characters
+        # Truncate branch name if it's longer than 42 characters
       - name: Truncate branch name
         id: truncate-branch-name
         uses: 2428392/gh-truncate-string-action@v1.2.0
