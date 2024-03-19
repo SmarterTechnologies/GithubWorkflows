@@ -1,3 +1,4 @@
+# TODO: added create-slot.yml workflow, the code below will be removed after migrating all the repos to use shareable workflow
 name: Create Deployment Slot
 on:
   workflow_call:
@@ -27,7 +28,7 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.token }}
-      
+
       #Create the deployment slot
     - name: Create slot
       uses: azure/CLI@v1
@@ -35,7 +36,7 @@ jobs:
         azcliversion: latest
         inlineScript: |
           az webapp deployment slot create --resource-group ${{ inputs.resource-group }}  --name ${{ inputs.web-app }} --slot ${{ inputs.slot-name }}
-      
+
      # Sign out of Azure
     - name: Logout of Azure
       run: az logout

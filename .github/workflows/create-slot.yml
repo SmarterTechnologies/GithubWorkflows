@@ -1,0 +1,42 @@
+name: Create Deployment Slot
+on:
+  workflow_call:
+    inputs:
+      resource-group:
+        description: "The name of the Azure resource group"
+        required: true
+        type: string
+      web-app:
+        description: "The name of the web app"
+        required: true
+        type: string
+      slot-name:
+        description: "The name of the deployment slot"
+        required: false
+        type: string
+    secrets:
+      token:
+        required: true
+
+jobs:
+  create-slot:
+    runs-on: ubuntu-latest
+    steps:
+      # Login to Azure
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.token }}
+
+        #Create the deployment slot
+      - name: Create slot
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az webapp deployment slot create --resource-group ${{ inputs.resource-group }}  --name ${{ inputs.web-app }} --slot ${{ inputs.slot-name }}
+
+      # Sign out of Azure
+      - name: Logout of Azure
+        run: az logout
+        if: always()
