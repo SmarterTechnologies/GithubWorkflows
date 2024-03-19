@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       webApp:
-        description: "We App Name"
+        description: "Web App Name"
         required: true
         type: string
       resourceGroup:
@@ -27,6 +27,8 @@ on:
 jobs:
   create-slot-name:
     uses: ./.github/workflows/create-slot-name.yml
+    with:
+      webApp: ${{ inputs.webApp }}
 
   build:
     uses: ./.github/workflows/build-angular.yml

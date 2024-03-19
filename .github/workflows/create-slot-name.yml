@@ -1,6 +1,11 @@
 name: Get slot name from branch
 on:
   workflow_call:
+    inputs:
+      webApp:
+        description: "Web App Name"
+        required: true
+        type: string
     outputs:
       slot-name:
         value: ${{ jobs.create-deployment-slot-name.outputs.slot-name }}
@@ -19,16 +24,26 @@ jobs:
         #Remove forward slash from name as its invalid for deployment slot name.
       - name: Remove feature from branch name
         id: rename-branch-name
-        uses: mad9000/actions-find-and-replace-string@2
+        uses: mad9000/actions-find-and-replace-string@27ff719b52870980e6ce19c288c5d3cc3ad202fa
         with:
           source: ${{ steps.branch-name.outputs.current_branch }}
           find: '/'
           replace: '-'
 
-        # Truncate branch name if it's longer than 42 characters
+        # Calculate max slot name length - 'webApp-slotName' cannot be longer than 59 characters
+      - name: Get deployment slot max name length
+        id: slot-max-name-length
+        env:
+          webAppName: ${{inputs.webApp}}
+        run: |
+          webAppLength=${#webAppName}
+          slotNameMaxLength=$((58-$webAppLength))
+          echo "::set-output name=value::$slotNameMaxLength"
+
+        # Truncate branch name so site name and slot name combined are fewer than 59 characters
       - name: Truncate branch name
         id: truncate-branch-name
         uses: 2428392/gh-truncate-string-action@v1.2.0
         with:
           stringToTruncate: ${{ steps.rename-branch-name.outputs.value }}
-          maxLength: 42
+          maxLength: ${{steps.slot-max-name-length.outputs.value}}
