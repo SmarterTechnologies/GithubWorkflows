@@ -1,0 +1,11 @@
+name: Audit repo
+on:
+  workflow_call:
+jobs:
+  audit-repo:
+    name: Audit repo
+    runs-on: ubuntu-latest
+    steps:
+      - name: run auditjs
+        run: |
+          npx auditjs@beta ossi

@@ -25,6 +25,8 @@ on:
         required: true
 
 jobs:
+  audit-repo:
+    uses: ./.github/workflows/audit-repo.yml
   create-slot-name:
     uses: ./.github/workflows/create-slot-name.yml
     with:
