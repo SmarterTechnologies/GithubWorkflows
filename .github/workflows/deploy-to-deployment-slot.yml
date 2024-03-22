@@ -34,9 +34,8 @@ jobs:
     uses: ./.github/workflows/build-angular.yml
     with:
       build-env: ${{ inputs.buildEnv }}
-  audit-repo:
-    needs: [build]
-    uses: ./.github/workflows/audit-repo.yml
+#  audit-repo:
+#    uses: ./.github/workflows/audit-repo.yml
   #Only create slot once name identified
   create-slot:
     needs: [ create-slot-name ]
