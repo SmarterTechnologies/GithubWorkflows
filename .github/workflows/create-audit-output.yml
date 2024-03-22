@@ -1,0 +1,27 @@
+name: Create audit output
+on:
+  workflow_call:
+    inputs:
+      auditResult:
+        description: Audit result
+        required: true
+        type: string
+jobs:
+  read-result:
+    name: Read result
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read result and create output
+        id: read-result
+        env:
+          auditResult: ${{inputs.auditResult}}
+        run: |
+          echo "## Vulnerabilities summary" >> $GITHUB_STEP_SUMMARY
+          summary=$(  echo $auditResult | jq -r '[.[]
+          | {coordinates, vulnerabilities: .vulnerabilities[]
+          | {id, cvssScore, level: (if .cvssScore >= 9 then "critical" elif .cvssScore >= 7 then "high" elif .cvssScore >= 4 then "medium" elif .cvssScore > 0 then "low" else "none" end)}}
+          | "Vulnerability \(.vulnerabilities.id) found in \(.coordinates). Cvss Score - \(.vulnerabilities.cvssScore). Level - \(.vulnerabilities.level)"] | @csv')
+            IFS=","
+            for v in $summary
+            do echo "- $v" >> $GITHUB_STEP_SUMMARY
+            done
