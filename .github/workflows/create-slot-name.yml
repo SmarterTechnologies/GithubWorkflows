@@ -40,7 +40,7 @@ jobs:
         run: |
           webAppLength=${#webAppName}
           slotNameMaxLength=$((58-$webAppLength))
-          echo "::set-output name=value::$slotNameMaxLength"
+          echo "value=$slotNameMaxLength" >> $GITHUB_OUTPUT
 
         # Truncate branch name so site name and slot name combined are fewer than 59 characters
         # Uses v1.2.0
