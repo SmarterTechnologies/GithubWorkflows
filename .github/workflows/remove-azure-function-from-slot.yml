@@ -1,0 +1,66 @@
+name: Stop and Delete Azure Function App Slot, named according to branch name
+
+on:
+  workflow_call:
+    inputs:
+      functionapp-name:
+        description: 'The name of the function app.'
+        required: true
+        type: string
+      resource-group:
+        required: true
+        type: string
+        description: 'The Azure resource group containing the Azure Function app.'
+    secrets:
+      azure-credentials:
+        required: true
+        description: 'Azure service principal credentials for login.'
+      jira-user-email:
+        required: true
+        description: 'Email of the Jira user for authentication.'
+      jira-base-url:
+        required: true
+        description: 'Base URL of the Jira instance.'
+      jira-api-token:
+        required: true
+        description: 'API token for the Jira user.'
+
+jobs:
+  setup:
+    name: Call Create Slot Name Workflow
+    uses: SmarterTechnologies/GithubWorkflows/.github/workflows/create-slot-name.yml@main
+    with:
+      webApp: ${{ inputs.functionapp-name }}
+      
+  stop-and-delete-slot:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.azure-credentials }}
+
+      - name: Stop the Function App Slot
+        run: |
+          az functionapp stop --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }}
+          echo "Slot ${{ needs.setup.outputs.slot-name }} has been stopped."
+
+      - name: Delete the Function App Slot
+        run: |
+          az functionapp deployment slot delete --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} --yes
+          echo "Slot ${{ needs.setup.outputs.slot-name }} has been deleted."
+
+  comment-on-jira:
+    needs: stop-and-delete-slot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment on Jira Ticket
+        uses: SmarterTechnologies/GithubWorkflows/.github/workflows/comment_on_jira_ticket.yml@main
+        with:
+          ticketId: ${{ github.ref_name }} # Dynamically sets the ticket ID to the branch name, e.g. "WP-3746"
+          jiraMessage: "Terminated https://${{ inputs.functionapp-name }}-${{ needs.setup.outputs.slot-name }}.azurewebsites.net"
+        secrets:
+          jiraUsername: ${{ secrets.jira-user-email }}
+          jiraHost: ${{ secrets.jira-base-url }}
+          jiraToken: ${{ secrets.jira-api-token }}
