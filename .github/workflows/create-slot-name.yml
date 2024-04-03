@@ -6,6 +6,10 @@ on:
         description: "Web App Name"
         required: true
         type: string
+      branch-name:
+        required: false
+        type: string
+        description: 'The name of the branch to process. If not provided, it will be automatically determined.'
     outputs:
       slot-name:
         value: ${{ jobs.create-deployment-slot-name.outputs.slot-name }}
@@ -16,31 +20,33 @@ jobs:
     outputs:
       slot-name: ${{ steps.truncate-branch-name.outputs.string }}
     steps:
-      #Uses the current branch as the deployment slot name
+      # Uses the provided branch name or it defaults to the current
+      # branch, if empty, for the deployment slot name (legacy behaviour)
       # Uses v6
       - name: Get branch name
-        id: branch-name
+        if: ${{ inputs.branch-name == '' }}
+        id: auto-branch-name
         uses: tj-actions/branch-names@6871f53176ad61624f978536bbf089c574dc19a2
 
-        #Remove forward slash from name as its invalid for deployment slot name.
-        # Uses v2
+      # Remove forward slash from name as its invalid for deployment slot name.
+      # Uses v2      
       - name: Remove feature from branch name
         id: rename-branch-name
         uses: mad9000/actions-find-and-replace-string@27ff719b52870980e6ce19c288c5d3cc3ad202fa
         with:
-          source: ${{ steps.branch-name.outputs.current_branch }}
+          source: ${{ inputs.branch-name || steps.auto-branch-name.outputs.current_branch }}
           find: '/'
           replace: '-'
 
         # Calculate max slot name length - 'webApp-slotName' cannot be longer than 59 characters
       - name: Get deployment slot max name length
         id: slot-max-name-length
-        env:
-          webAppName: ${{inputs.webApp}}
         run: |
           webAppLength=${#webAppName}
-          slotNameMaxLength=$((58-$webAppLength))
-          echo "value=$slotNameMaxLength" >> $GITHUB_OUTPUT
+          slotNameMaxLength=$((58 - webAppLength))
+          echo "max-length=$slotNameMaxLength" >> $GITHUB_ENV
+        env:
+          webAppName: ${{ inputs.webApp }}
 
         # Truncate branch name so site name and slot name combined are fewer than 59 characters
         # Uses v1.2.0
@@ -49,4 +55,4 @@ jobs:
         uses: 2428392/gh-truncate-string-action@51c56c4b37c0f79b5f662782e22cddc712ba45b8
         with:
           stringToTruncate: ${{ steps.rename-branch-name.outputs.value }}
-          maxLength: ${{steps.slot-max-name-length.outputs.value}}
+          maxLength: ${{ env.max-length }}
