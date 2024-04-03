@@ -100,3 +100,17 @@ jobs:
       #   run: |
       #     az functionapp deployment slot delete --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} --yes
       #     echo "Slot ${{ needs.setup.outputs.slot-name }} has been deleted."
+
+    comment-on-jira:
+    needs: stop-and-delete-slot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment on Jira Ticket
+        uses: SmarterTechnologies/GithubWorkflows/.github/workflows/comment_on_jira_ticket.yml@main
+        with:
+          ticketId: ${{ github.ref_name }} # Dynamically sets the ticket ID to the branch name, e.g. "WP-3746"
+          jiraMessage: "Terminated https://${{ inputs.functionapp-name }}-${{ needs.setup.outputs.slot-name }}.azurewebsites.net"
+        secrets:
+          jiraUsername: ${{ secrets.jira-user-email }}
+          jiraHost: ${{ secrets.jira-base-url }}
+          jiraToken: ${{ secrets.jira-api-token }}
