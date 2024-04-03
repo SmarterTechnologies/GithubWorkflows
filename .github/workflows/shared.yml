@@ -58,13 +58,45 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.azure-credentials }}
-
       - name: Stop the Function App Slot
         run: |
-          az functionapp stop --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }}
-          echo "Slot ${{ needs.setup.outputs.slot-name }} has been stopped."
-
+          set +e
+          deleteOutput=$(az functionapp stop --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} 2>&1)
+          deleteStatus=$?
+          if [ $deleteStatus -ne 0 ]; then
+            if [[ $deleteOutput == *"ResourceNotFound"* ]]; then
+              echo "Slot ${{ needs.setup.outputs.slot-name }} could not be found. It might have been deleted already."
+            else
+              echo "$deleteOutput"
+              exit $deleteStatus
+            fi
+          else
+            echo "Slot ${{ needs.setup.outputs.slot-name }} has been stopped."
+          fi
+          set -e
       - name: Delete the Function App Slot
         run: |
-          az functionapp deployment slot delete --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} --yes
-          echo "Slot ${{ needs.setup.outputs.slot-name }} has been deleted."
+          set +e
+          deleteOutput=$(az functionapp deployment slot delete --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} --yes 2>&1)
+          deleteStatus=$?
+          if [ $deleteStatus -ne 0 ]; then
+            if [[ $deleteOutput == *"ResourceNotFound"* ]]; then
+              echo "Slot ${{ needs.setup.outputs.slot-name }} could not be found. It might have been deleted already."
+            else
+              echo "$deleteOutput"
+              exit $deleteStatus
+            fi
+          else
+            echo "Slot ${{ needs.setup.outputs.slot-name }} has been deleted."
+          fi
+          set -e          
+
+      # - name: Stop the Function App Slot
+      #   run: |
+      #     az functionapp stop --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }}
+      #     echo "Slot ${{ needs.setup.outputs.slot-name }} has been stopped."
+
+      # - name: Delete the Function App Slot
+      #   run: |
+      #     az functionapp deployment slot delete --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} --yes
+      #     echo "Slot ${{ needs.setup.outputs.slot-name }} has been deleted."
