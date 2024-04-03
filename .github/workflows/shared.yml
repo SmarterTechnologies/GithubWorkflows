@@ -99,9 +99,9 @@ jobs:
       jiraMessage: |
         - Terminated slot.
     secrets:
-      jiraUsername: ${{ secrets.jiraUserEmail }}
-      jiraHost: ${{ secrets.jiraBaseUrl }}
-      jiraToken: ${{ secrets.jiraApiToken }}
+      jiraUsername: ${{ secrets.jira-user-email }}
+      jiraHost: ${{ secrets.jira-base-url }}
+      jiraToken: ${{ secrets.jira-api-token }}
 
 
       # - name: Stop the Function App Slot
