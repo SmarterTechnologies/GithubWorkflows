@@ -55,7 +55,7 @@ jobs:
   setup:
     needs: setup-and-check
     if: ${{ needs.setup-and-check.outputs.should-execute == 'true' }}
-    uses: SmarterTechnologies/GithubWorkflows/.github/workflows/create-slot-nameV2.yml@feature/SOF-503
+    uses: SmarterTechnologies/GithubWorkflows/.github/workflows/create-slot-nameV3.yml@feature/SOF-503
     with:
       webApp: ${{ inputs.functionapp-name }}
       branch-name: ${{ inputs.branch-name }}
