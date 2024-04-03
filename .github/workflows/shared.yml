@@ -101,7 +101,7 @@ jobs:
       #     az functionapp deployment slot delete --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} --yes
       #     echo "Slot ${{ needs.setup.outputs.slot-name }} has been deleted."
 
-    comment-on-jira:
+  comment-on-jira:
     needs: stop-and-delete-slot
     runs-on: ubuntu-latest
     steps:
