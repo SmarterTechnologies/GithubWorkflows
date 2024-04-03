@@ -47,9 +47,9 @@ jobs:
         id: check-conditions
         run: |
           if [[ "${{ inputs.branch-name }}" != "main" && "${{ inputs.branch-name }}" != "master" && "${{ inputs.branch-name }}" != "$DEFAULT_BRANCH" ]]; then
-            echo "::set-output name=should-execute::true"
+            echo "should-execute=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=should-execute::false"
+            echo "should-execute=false" >> $GITHUB_OUTPUT
           fi
 
   setup:
