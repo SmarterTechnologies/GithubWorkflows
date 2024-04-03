@@ -95,7 +95,7 @@ jobs:
     name: Comment on Jira ticket
     uses: SmarterTechnologies/GithubWorkflows/.github/workflows/comment_on_jira_ticket.yml@main
     with:
-      ticketId: ${{ github.ref_name }} # Dynamically sets the ticket ID to the branch name, e.g. "WP-3746"
+      ticketId: ${{ inputs.branch-name }} # Dynamically sets the ticket ID to the branch name, e.g. "WP-3746"
       jiraMessage: |
         - Terminated slot.
     secrets:
