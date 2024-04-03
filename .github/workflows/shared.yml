@@ -44,3 +44,8 @@ jobs:
       - name: Check and Echo Branch Name
         if: ${{ inputs.branch-name != 'main' && inputs.branch-name != 'master' && inputs.branch-name != env.DEFAULT_BRANCH }}
         run: echo "Hello World, I am deleting ${{ inputs.branch-name }}"
+  setup:
+    name: Call Create Slot Name Workflow
+    uses: SmarterTechnologies/GithubWorkflows/.github/workflows/create-slot-name.yml@main
+    with:
+      webApp: ${{ inputs.functionapp-name }}
