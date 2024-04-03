@@ -49,3 +49,21 @@ jobs:
     uses: SmarterTechnologies/GithubWorkflows/.github/workflows/create-slot-name.yml@main
     with:
       webApp: ${{ inputs.functionapp-name }}
+  stop-and-delete-slot:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.azure-credentials }}
+
+      - name: Stop the Function App Slot
+        run: |
+          az functionapp stop --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }}
+          echo "Slot ${{ needs.setup.outputs.slot-name }} has been stopped."
+
+      - name: Delete the Function App Slot
+        run: |
+          az functionapp deployment slot delete --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} --yes
+          echo "Slot ${{ needs.setup.outputs.slot-name }} has been deleted."
