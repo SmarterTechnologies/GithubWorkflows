@@ -58,7 +58,7 @@ jobs:
     uses: SmarterTechnologies/GithubWorkflows/.github/workflows/create-slot-nameV3.yml@feature/SOF-503
     with:
       webApp: ${{ inputs.functionapp-name }}
-      #branch-name: ${{ inputs.branch-name }}
+      branch-name: ${{ inputs.branch-name }}
 
   stop-and-delete-slot:
     needs: setup
