@@ -7,6 +7,19 @@ on:
         required: true
         type: string
         description: 'The name of the branch being processed.'
+    secrets:
+      azure-credentials:
+        required: true
+        description: 'Azure service principal credentials for login.'
+      jira-user-email:
+        required: true
+        description: 'Email of the Jira user for authentication.'
+      jira-base-url:
+        required: true
+        description: 'Base URL of the Jira instance.'
+      jira-api-token:
+        required: true
+        description: 'API token for the Jira user.'
 
 jobs:
   branch-check-and-echo:
