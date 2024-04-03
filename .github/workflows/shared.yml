@@ -77,7 +77,7 @@ jobs:
       - name: Delete the Function App Slot
         run: |
           set +e
-          deleteOutput=$(az functionapp deployment slot delete --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} --yes 2>&1)
+          deleteOutput=$(az functionapp deployment slot delete --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} 2>&1)
           deleteStatus=$?
           if [ $deleteStatus -ne 0 ]; then
             if [[ $deleteOutput == *"ResourceNotFound"* ]]; then
