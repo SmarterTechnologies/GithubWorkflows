@@ -3,6 +3,10 @@ name: Stop and Delete Azure Function App Slot, named according to branch name
 on:
   workflow_call:
     inputs:
+      branch-name:
+        required: true
+        type: string
+        description: 'The name of the branch being processed.'
       functionapp-name:
         description: 'The name of the function app.'
         required: true
@@ -26,12 +30,36 @@ on:
         description: 'API token for the Jira user.'
 
 jobs:
+  setup-and-check:
+    runs-on: ubuntu-latest
+    outputs:
+      should-execute: ${{ steps.check-conditions.outputs.should-execute }}
+    steps:
+      - name: Fetch Default Branch Name
+        id: fetch-default-branch
+        run: |
+          DEFAULT_BRANCH=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          https://api.github.com/repos/${{ github.repository }} | jq -r '.default_branch')
+          echo "Fetched default branch is $DEFAULT_BRANCH"
+        shell: bash
+
+      - name: Check Conditions
+        id: check-conditions
+        run: |
+          if [[ "${{ inputs.branch-name }}" != "main" && "${{ inputs.branch-name }}" != "master" && "${{ inputs.branch-name }}" != "$DEFAULT_BRANCH" ]]; then
+            echo "::set-output name=should-execute::true"
+          else
+            echo "::set-output name=should-execute::false"
+          fi
+
   setup:
-    name: Call Create Slot Name Workflow
-    uses: SmarterTechnologies/GithubWorkflows/.github/workflows/create-slot-name.yml@main
+    needs: setup-and-check
+    if: ${{ needs.setup-and-check.outputs.should-execute == 'true' }}
+    uses: SmarterTechnologies/GithubWorkflows/.github/workflows/create-slot-nameV2.yml@feature/SOF-503
     with:
       webApp: ${{ inputs.functionapp-name }}
-      
+      branch-name: ${{ inputs.branch-name }}
+
   stop-and-delete-slot:
     needs: setup
     runs-on: ubuntu-latest
@@ -43,24 +71,22 @@ jobs:
 
       - name: Stop the Function App Slot
         run: |
-          az functionapp stop --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }}
-          echo "Slot ${{ needs.setup.outputs.slot-name }} has been stopped."
+          set +e
+          deleteOutput=$(az functionapp stop --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} 2>&1)
+          deleteStatus=$?
+          if [ $deleteStatus -ne 0 ]; then
+            if [[ $deleteOutput == *"ResourceNotFound"* ]]; then
+              echo "Slot ${{ needs.setup.outputs.slot-name }} could not be found. It might have been deleted already."
+            else
+              echo "$deleteOutput"
+              exit $deleteStatus
+            fi
+          else
+            echo "Slot ${{ needs.setup.outputs.slot-name }} has been stopped."
+          fi
+          set -e
 
       - name: Delete the Function App Slot
         run: |
-          az functionapp deployment slot delete --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} --yes
+          az functionapp deployment slot delete --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }}
           echo "Slot ${{ needs.setup.outputs.slot-name }} has been deleted."
-
-  comment-on-jira:
-    needs: stop-and-delete-slot
-    runs-on: ubuntu-latest
-    steps:
-      - name: Comment on Jira Ticket
-        uses: SmarterTechnologies/GithubWorkflows/.github/workflows/comment_on_jira_ticket.yml@main
-        with:
-          ticketId: ${{ github.ref_name }} # Dynamically sets the ticket ID to the branch name, e.g. "WP-3746"
-          jiraMessage: "Terminated https://${{ inputs.functionapp-name }}-${{ needs.setup.outputs.slot-name }}.azurewebsites.net"
-        secrets:
-          jiraUsername: ${{ secrets.jira-user-email }}
-          jiraHost: ${{ secrets.jira-base-url }}
-          jiraToken: ${{ secrets.jira-api-token }}
