@@ -28,7 +28,7 @@ jobs:
       
       - name: Normalize branch name
         id: rename-branch-name
-        uses: mad9000/actions-find-and-replace-string@v2
+        uses: mad9000/actions-find-and-replace-string@27ff719b52870980e6ce19c288c5d3cc3ad202fa
         with:
           source: ${{ inputs.branch-name || steps.auto-branch-name.outputs.current_branch }}
           find: '/'
