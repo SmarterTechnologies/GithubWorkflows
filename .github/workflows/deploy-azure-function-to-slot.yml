@@ -61,6 +61,10 @@ jobs:
           az functionapp deployment slot create --name ${{ inputs.functionapp-name }} --resource-group ${{ inputs.resource-group }} --slot ${{ needs.setup.outputs.slot-name }} || true
           echo "Deployment slot ready: ${{ needs.setup.outputs.slot-name }}"
 
+      # Introduce a delay to ensure the slot is available (fundamental Azure issues)
+      - name: Wait for Slot to be ready
+        run: sleep 10
+
       # Generate Publish Profile for the Function App Slot
       - name: Generate Publish Profile
         id: generate_publish_profile
