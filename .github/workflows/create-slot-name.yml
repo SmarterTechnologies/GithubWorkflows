@@ -52,7 +52,7 @@ jobs:
         # Uses v1.2.0
       - name: Truncate branch name
         id: truncate-branch-name
-        uses: 2428392/gh-truncate-string-action@51c56c4b37c0f79b5f662782e22cddc712ba45b8
+        uses: 2428392/gh-truncate-string-action@67b1b814955634208b103cff064be3cb1c7a19be
         with:
           stringToTruncate: ${{ steps.rename-branch-name.outputs.value }}
           maxLength: ${{ env.max-length }}
