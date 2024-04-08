@@ -32,7 +32,7 @@ jobs:
       # Uses v2      
       - name: Remove feature from branch name
         id: rename-branch-name
-        uses: mad9000/actions-find-and-replace-string@27ff719b52870980e6ce19c288c5d3cc3ad202fa
+        uses: mad9000/actions-find-and-replace-string@bce4d50390d08b67e1822bd72fb54b3cf11b0ce9
         with:
           source: ${{ inputs.branch-name || steps.auto-branch-name.outputs.current_branch }}
           find: '/'
