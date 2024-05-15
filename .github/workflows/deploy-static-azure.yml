@@ -64,7 +64,7 @@ jobs:
             if [ "$container_exists" == "true" ]; then
               az storage blob delete-batch -s '$web' --account-name ${{ inputs.account-name }} --auth-mode login
             else
-              echo "Container '$web' does not exist. Skipping delete operation."
+              echo "Container '\$web' does not exist. Skipping delete operation."
             fi
 
       # Upload to $web container
@@ -73,7 +73,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            az storage blob upload-batch --account-name ${{ inputs.account-name }} -d '$web' -s dist
+            az storage blob upload-batch --account-name ${{ inputs.account-name }} -d '$web' -s dist --auth-mode login
 
       # Remove the IP from list - if prod branch
       - name: Remove IP from whitelist
@@ -82,7 +82,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            az storage account network-rule remove -g ${{ inputs.resource-group }} --account-name ${{ inputs.account-name }} --ip-address ${{ steps.ip.outputs.ipv4 }}
+            az storage account network-rule remove -g ${{ inputs.resource-group }} --account-name ${{ inputs.account-name }} --ip-address ${{ steps.ip.outputs.ipv4 }} --auth-mode login
 
       # Sign out of Azure
       - name: Logout of Azure
