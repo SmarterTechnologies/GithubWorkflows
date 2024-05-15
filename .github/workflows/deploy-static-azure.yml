@@ -60,7 +60,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            az storage blob delete-batch -s '$web' --account-name ${{ inputs.account-name }}
+            az storage blob delete-batch -s '$web' --account-name ${{ inputs.account-name }} --auth-mode login
 
       # Upload to $web container
       - name: Upload to blob storage
