@@ -67,6 +67,20 @@ jobs:
               echo "Container '\$web' does not exist. Skipping delete operation."
             fi
 
+      # Create $web container if it doesn't exist
+      - name: Create $web container
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript: |
+            container_exists=$(az storage container exists --name '$web' --account-name ${{ inputs.account-name }} --auth-mode login --query exists)
+            if [ "$container_exists" != "true" ]; then
+              az storage container create --name '$web' --account-name ${{ inputs.account-name }} --auth-mode login
+              echo "Container '\$web' created."
+            else
+              echo "Container '\$web' already exists."
+            fi
+
       # Upload to $web container
       - name: Upload to blob storage
         uses: azure/CLI@v1
