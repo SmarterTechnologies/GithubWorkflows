@@ -1,0 +1,43 @@
+name: Build Angular App
+on:
+  workflow_call:
+    inputs:
+      build-env:
+        required: false
+        type: string
+        description: "Test or Production"
+        default: test
+      node-version:
+        required: false
+        type: string
+        description: "Node version"
+        default: "16.x"
+      angular-cli-version:
+        required: false
+        type: string
+        description: "Angular CLI version"
+        default: "16.2.10"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+      - name: npm install and build
+        run: |
+          sudo npm install -g @angular/cli@${{ inputs.angular-cli-version }}
+          npm install --force
+          ng build -c ${{ inputs.build-env }}
+
+      # keep upload for 1 day
+      - name: Upload build output to artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 1
