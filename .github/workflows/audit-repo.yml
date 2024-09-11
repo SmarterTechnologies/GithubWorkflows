@@ -1,0 +1,31 @@
+name: Audit repo
+on:
+  workflow_call:
+    outputs:
+      audit-result:
+        value: ${{ jobs.audit-repo.outputs.audit-result }}
+jobs:
+  audit-repo:
+    name: Audit repo
+    runs-on: ubuntu-latest
+    outputs:
+      audit-result: ${{steps.run-audit.outputs.result}}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - name: npm install, build
+        run: |
+          npm ci
+          npm run build --if-present
+        env:
+          CI: true
+      - name: run auditjs
+        id: run-audit
+        shell: bash {0} # has to be used, or auditjs will cause whole job to fail if vulnerabilities are present
+        run: |
+          result=$(npx auditjs ossi --q --json)
+          oneLineResult=$(echo $result | paste -sd " " -)
+          echo "::set-output name=result::$oneLineResult"
