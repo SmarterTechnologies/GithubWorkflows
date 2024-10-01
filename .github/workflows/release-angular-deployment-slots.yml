@@ -19,18 +19,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
 
       - name: Log into Azure CLI with service principal
-        uses: azure/login@v1.1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.token }}
 
       - name: Deploy to slot on staging site
-        uses: azure/webapps-deploy@v1
+        uses: azure/webapps-deploy@v2
         id: deploy-to-webapp
         with: 
           app-name: ${{ inputs.web-app }}
