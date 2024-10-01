@@ -18,24 +18,24 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
 
       # Get IP address - if prod
       - name: Get Public IP
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         id: ip
-        uses: haythem/public-ip@v1.2
+        uses: haythem/public-ip@v1.3
 
       # Login to Azure
       - name: Azure Login
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.token }}
 
       # Whitelist the IP address - if prod branch
       - name: Set IP whitelist for this IP (Prod Only)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         with:
           inlineScript: |
             az storage account network-rule add -g ${{ inputs.resource-group }} --account-name ${{ inputs.account-name }} --ip-address ${{ steps.ip.outputs.ipv4 }}
@@ -56,7 +56,7 @@ jobs:
 
       # Clear blob storage if build folder exists
       - name: Delete blob storage contents
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         with:
           azcliversion: latest
           inlineScript: |
@@ -64,7 +64,7 @@ jobs:
 
       # Upload to $web container
       - name: Upload to blob storage
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         with:
           azcliversion: latest
           inlineScript: |
@@ -73,7 +73,7 @@ jobs:
       # Remove the IP from list - if prod branch
       - name: Remove IP from whitelist
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         with:
           azcliversion: latest
           inlineScript: |
