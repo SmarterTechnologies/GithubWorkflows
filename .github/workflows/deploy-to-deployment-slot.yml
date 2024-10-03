@@ -44,8 +44,8 @@ jobs:
     uses: ./.github/workflows/build-angular.yml
     with:
       build-env: ${{ inputs.buildEnv }}
-      node-version: "18.20.4"
-      angular-cli-version: "18.2.7"
+      node-version: ${{ inputs.node-version }}
+      angular-cli-version: ${{ inputs.angular-cli-version }}
   #Only create slot once name identified
   create-slot:
     needs: [ create-slot-name ]
