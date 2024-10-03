@@ -1,6 +1,12 @@
 name: Audit repo
 on:
   workflow_call:
+    inputs:
+      node-version:
+        required: false
+        type: string
+        description: "Node version"
+        default: "16.x"
     outputs:
       audit-result:
         value: ${{ jobs.audit-repo.outputs.audit-result }}
@@ -12,10 +18,10 @@ jobs:
       audit-result: ${{steps.run-audit.outputs.result}}
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 16
+      - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: ${{ inputs.node-version }}
       - name: npm install, build
         run: |
           npm ci
