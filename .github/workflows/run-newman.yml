@@ -6,6 +6,11 @@ on:
         required: true
         type: string
         description: "Path to Postman collection"
+      node-version:
+        required: false
+        type: string
+        description: "Node version"
+        default: "16.x"
       env:
         required: true
         type: string
@@ -23,7 +28,7 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v1
         with:
-          node-version: "16.x"
+          node-version: ${{inputs.node-version}}
 
       - name: Install newman
         run: npm install -g newman
