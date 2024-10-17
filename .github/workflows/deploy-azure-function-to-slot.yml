@@ -28,25 +28,25 @@ on:
 jobs:
   setup:
     name: Call Create Slot Name Workflow
-    uses: SmarterTechnologies/GithubWorkflows/.github/workflows/create-slot-name.yml@main
+    uses: SmarterTechnologies/GithubWorkflows/.github/workflows/create-slot-name.yml@develop
     with:
       webApp: ${{ inputs.functionapp-name }}
   deploy:
     needs: setup
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Login to Azure
       - name: Login to Azure
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           # passed in as a parameter
           creds: ${{ secrets.azure-credentials }}
 
       # Download the build directory (dist)
       - name: Download build artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
