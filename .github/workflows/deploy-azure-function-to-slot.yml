@@ -28,7 +28,7 @@ on:
 jobs:
   setup:
     name: Call Create Slot Name Workflow
-    uses: SmarterTechnologies/GithubWorkflows/.github/workflows/create-slot-name.yml@feature/SOF-559
+    uses: SmarterTechnologies/GithubWorkflows/.github/workflows/create-slot-name.yml@develop
     with:
       webApp: ${{ inputs.functionapp-name }}
   deploy:
