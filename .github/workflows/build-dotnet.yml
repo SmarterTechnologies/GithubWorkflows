@@ -2,16 +2,16 @@ name: Build dotNET App
 on:
   workflow_call:
     inputs:
-      dotnet-core-version:
+      dotnet-version:
         required: false
         type: string
-        description: ".NET Core version"
-        default: 3.1.x
-      dotnet-core-version-inproc:
+        description: ".NET version"
+        default: 6.0.x
+      nugets-caching:
         required: false
-        type: string
-        description: ".NET Core version inproc"
-        default: ""
+        type: boolean
+        default: false
+        description: "Cache Nuget dependecies"
       configuration:
         required: false
         type: string
@@ -34,20 +34,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ inputs.dotnet-core-version }}
-    - name: Setup .NET Core (for inproc extensions)
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: ${{ inputs.dotnet-core-version-inproc }}
+        dotnet-version: ${{ inputs.dotnet-version }}
+        cache: ${{ inputs.nugets-caching }}
+        cache-dependency-path: ${{ inputs.working-directory }}/packages.lock.json
+
     - name: Restore
       run: |
         dotnet nuget add source ${{ env.AZURE_ARTIFACTS_FEED_URL }} --name ${{ env.NUGET_FEED_NAME }} --username az --password ${{ secrets.azure-artifacts-pat }} --store-password-in-clear-text
-        dotnet restore "${{ inputs.working-directory }}"
+        dotnet restore "${{ inputs.working-directory }}" --locked-mode
     - name: Build
       run: dotnet build "${{ inputs.working-directory }}" --configuration ${{ inputs.configuration }} --no-restore
     - name: Publish
@@ -55,8 +54,9 @@ jobs:
     
     # keep upload for 1 day
     - name: Upload build output to artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dist
+        include-hidden-files: true
         path: ${{ env.OUTPUT_PATH }}
         retention-days: 1

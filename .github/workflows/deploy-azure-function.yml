@@ -25,25 +25,25 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
 
       # Get IP address - if prod
       - name: Get Public IP
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         id: ip
-        uses: haythem/public-ip@v1.2
+        uses: haythem/public-ip@v1.3
 
       # Login to Azure
       - name: Azure Login
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.token }}
 
       # Update security restriction if branch is main/master
       - name: Bicep set security restriction
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: azure/CLI@v1
+        uses: azure/cli@v2
         with:
           azcliversion: 2.63.0 # 2.64 Has breaking changes https://github.com/Azure/cli/issues/165 https://github.com/Azure/azure-cli/issues/29828
           # 1st command is a workaround for https://github.com/Azure/azure-cli/issues/25710
@@ -54,7 +54,7 @@ jobs:
       # Download build artifact
       - name: Download build output from artifacts
         id: build-folder
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
