@@ -34,7 +34,8 @@ jobs:
           cd functions
           npm install --force
           npm run build
-      - name: Load Environment Parameters
+      - name: Load environment parameters from 1Password
+        id: load-environment-parameters
         uses: 1password/load-secrets-action@v2
         with:
           export-env: false
@@ -42,7 +43,7 @@ jobs:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           DEFAULT_DOTENV: op://developer-general/github-actions/${{ inputs.platform }}-default
           PROJECT_DOTENV: op://developer-general/github-actions/${{ inputs.platform }}-${{ inputs.project-id }}
-      - name: Generate .env Files from Secrets
+      - name: Generate .env files from environment parameters
         run: |
           echo ${{ steps.load-environment-parameters.outputs.DEFAULT_DOTENV }} > .env
           echo ${{ steps.load-environment-parameters.outputs.PROJECT_DOTENV }} > .env.${{ inputs.project-id }}
