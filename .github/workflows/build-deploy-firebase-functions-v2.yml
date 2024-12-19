@@ -1,0 +1,56 @@
+name: Build and Deploy V2 Firebase Functions
+on:
+  workflow_call:
+    inputs:
+      project-id:
+        description: "The Firebase Project ID"
+        required: true
+        type: string
+      platform:
+        description: "The platform that is being deployed e.g. gtp"
+        required: true
+        type: string
+      node-version:
+        required: false
+        type: string
+        description: "Node version"
+        default: "20.x"
+    secrets:
+      gcp-sa-key:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ inputs.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ inputs.node-version }}
+      - name: Install npm packages and build functions
+        run: |
+          cd functions
+          npm install --force
+          npm run build
+      - name: Load Environment Parameters
+        uses: 1password/load-secrets-action@v2
+        with:
+          export-env: false
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          DEFAULT_DOTENV: op://developer-general/github-actions/${{ inputs.platform }}-default
+          PROJECT_DOTENV: op://developer-general/github-actions/${{ inputs.platform }}-${{ inputs.project-id }}
+      - name: Generate .env Files from Secrets
+        run: |
+          echo ${{ steps.load-environment-parameters.outputs.DEFAULT_DOTENV }} > .env
+          echo ${{ steps.load-environment-parameters.outputs.PROJECT_DOTENV }} > .env.${{ inputs.project-id }}
+
+      # Deploy to Firebase
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@v13.4.0
+        with:
+          args: deploy --only functions --project ${{ inputs.project-id }}
+        env:
+          GCP_SA_KEY: ${{ secrets.gcp-sa-key }}
