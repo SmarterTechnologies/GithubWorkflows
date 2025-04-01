@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ inputs.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -39,7 +39,7 @@ jobs:
       - name: Generate .env files from environment parameters
         run: |
           echo ${{ secrets.default-dotenv }} > .env
-          echo ${{ secrets.project-project-specific-dotenv }} > .env.${{ inputs.project-id }}
+          echo ${{ secrets.project-specific-dotenv }} > .env.${{ inputs.project-id }}
 
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@v13.4.0
@@ -47,3 +47,7 @@ jobs:
           args: deploy --only functions --project ${{ inputs.project-id }}
         env:
           GCP_SA_KEY: ${{ secrets.gcp-sa-key }}
+
+      - name: Clean up .env files
+        run: |
+          rm -f .env .env.${{ inputs.project-id }}
