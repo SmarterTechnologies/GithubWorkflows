@@ -49,7 +49,7 @@ jobs:
           npm run build
 
       - name: Deploy to Firebase
-        uses: w9jds/firebase-action@v14.0.0
+        uses: w9jds/firebase-action@v14.0.1
         with:
           args: deploy --only functions --project ${{ inputs.project-id }}
         env:
