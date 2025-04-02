@@ -16,8 +16,10 @@ on:
         required: true
       default-dotenv:
         required: true
+        description: ".env file for Firebase functions. May be shared across environments"
       project-specific-dotenv:
-        required: true
+        required: false
+        description: "Project-specific .env file for Firebase functions. In the format of .env.<project-id>"
 
 jobs:
   build:
@@ -35,7 +37,9 @@ jobs:
         run: |
           cd functions
           echo ${{ secrets.default-dotenv }} | base64 -d > .env
-          echo ${{ secrets.project-specific-dotenv }} | base64 -d > .env.${{ inputs.project-id }}
+          if [ -n "${{ secrets.project-specific-dotenv }}" ]; then
+            echo ${{ secrets.project-specific-dotenv }} | base64 -d > .env.${{ inputs.project-id }}
+          fi
           trap 'rm -f .env .env.${{ inputs.project-id }}' EXIT
 
       - name: Install npm packages and build functions
