@@ -1,0 +1,72 @@
+name: Clone Firestore Indexes
+
+on:
+    workflow_call:
+        inputs:
+            original-project-id:
+                description: "The Firebase Project ID whose indexes are to be cloned"
+                required: true
+                type: string
+
+            target-project-id:
+                description: "The Firebase Project ID for receiving copied indexes"
+                required: true
+                type: string
+
+            node-version:
+                description: "Node version"
+                required: false
+                type: string
+                default: "20.x"
+
+        secrets:
+            gcp-sa-key:
+                required: true
+
+jobs:
+    clone-indexes:
+        runs-on: ubuntu-latest
+
+        steps:
+        - uses: actions/checkout@v4
+        - name: Use Node.js ${{ inputs.node-version }}
+          uses: actions/setup-node@v4
+          with:
+            node-version: ${{ inputs.node-version }}
+
+        - name: Fetch indexes from ${{ inputs.original-project-id }} and deploy them to ${{ inputs.target-project-id }}
+          run: |
+            # Install dependencies
+            sudo apt-get install -y jq
+            echo "npm install -g firebase-tools"
+            npm install -g firebase-tools
+
+            GCP_SA_KEY="${{ secrets.gcp-sa-key }}"
+            mkdir -p sa-key
+
+            # Decode the key if necessary and store it as a JSON file
+            if [ -n "$GCP_SA_KEY" ]; then
+                if echo "$GCP_SA_KEY" | jq empty 2>/dev/null; then
+                    echo "GCP SA Key is JSON. Storing it directly."
+                    echo "$GCP_SA_KEY" > sa-key/gcp_key.json
+                else
+                    echo "GCP SA Key is Base64 encoded. Decoding and storing."
+                    echo "$GCP_SA_KEY" | base64 -d > sa-key/gcp_key.json
+                fi
+                
+                trap 'rm -rf sa-key' EXIT
+                # Set the environmental variable for Firebase
+                export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/sa-key/gcp_key.json"
+            else
+                echo "GCP_SA_KEY is empty. Exiting."
+                exit 1
+            fi
+
+            # Ensure firestore.indexes.json is removed before creating a new one
+            rm -f firestore.indexes.json
+
+            echo "firebase firestore:indexes --project ${{ inputs.original-project-id }} > firestore.indexes.json"
+            firebase firestore:indexes --project ${{ inputs.original-project-id }} > firestore.indexes.json
+
+            echo "firebase deploy --only firestore:indexes --project ${{ inputs.target-project-id }}"
+            firebase deploy --only firestore:indexes --project ${{ inputs.target-project-id }}
