@@ -21,6 +21,11 @@ on:
         required: true
         type: string
         description: "Working directory"
+      test:
+        required: false
+        type: boolean
+        default: false
+        description: "Run tests after build"
     secrets:
       azure-artifacts-pat:
         required: true
@@ -49,6 +54,9 @@ jobs:
         dotnet restore "${{ inputs.working-directory }}" --locked-mode
     - name: Build
       run: dotnet build "${{ inputs.working-directory }}" --configuration ${{ inputs.configuration }} --no-restore
+    - name: Test
+      if: ${{ inputs.test }}
+      run: dotnet test
     - name: Publish
       run: dotnet publish "${{ inputs.working-directory }}" --configuration ${{ inputs.configuration }} --no-build --output "${{ env.OUTPUT_PATH }}"
     
