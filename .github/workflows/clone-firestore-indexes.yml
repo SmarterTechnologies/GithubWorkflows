@@ -9,7 +9,7 @@ on:
                 type: string
 
             target-project-id:
-                description: "The Firebase Project ID to which indexes are to be cloned"
+                description: "The Firebase Project ID for receiving copied indexes"
                 required: true
                 type: string
 
