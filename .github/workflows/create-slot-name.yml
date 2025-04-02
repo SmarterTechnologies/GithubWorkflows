@@ -22,17 +22,17 @@ jobs:
     steps:
       # Uses the provided branch name or it defaults to the current
       # branch, if empty, for the deployment slot name (legacy behaviour)
-      # Uses v6
+      # Uses v8
       - name: Get branch name
         if: ${{ inputs.branch-name == '' }}
         id: auto-branch-name
-        uses: tj-actions/branch-names@6871f53176ad61624f978536bbf089c574dc19a2
+        uses: tj-actions/branch-names@v8
 
       # Remove forward slash from name as its invalid for deployment slot name.
-      # Uses v2      
-      - name: Remove feature from branch name
+      # Uses v5
+      - name: Remove '/' from branch name
         id: rename-branch-name
-        uses: mad9000/actions-find-and-replace-string@27ff719b52870980e6ce19c288c5d3cc3ad202fa
+        uses: mad9000/actions-find-and-replace-string@5
         with:
           source: ${{ inputs.branch-name || steps.auto-branch-name.outputs.current_branch }}
           find: '/'
@@ -49,10 +49,10 @@ jobs:
           webAppName: ${{ inputs.webApp }}
 
         # Truncate branch name so site name and slot name combined are fewer than 59 characters
-        # Uses v1.2.0
+        # Uses v1.4
       - name: Truncate branch name
         id: truncate-branch-name
-        uses: 2428392/gh-truncate-string-action@51c56c4b37c0f79b5f662782e22cddc712ba45b8
+        uses: 2428392/gh-truncate-string-action@v1.4
         with:
           stringToTruncate: ${{ steps.rename-branch-name.outputs.value }}
           maxLength: ${{ env.max-length }}
