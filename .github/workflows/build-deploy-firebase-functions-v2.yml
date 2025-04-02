@@ -22,7 +22,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ inputs.node-version }}
@@ -31,6 +30,8 @@ jobs:
           node-version: ${{ inputs.node-version }}
 
       - name: Generate .env files from environment parameters
+      # Github encodes secrets in base64, so we need to decode them before using them
+      # trap ensures the files are deleted on exit, even if the script fails
         run: |
           cd functions
           echo ${{ secrets.default-dotenv }} | base64 -d > .env
