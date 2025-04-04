@@ -36,11 +36,13 @@ on:
 
 jobs:
   create-slot-name:
+    name: Create Slot Name
     uses: ./.github/workflows/create-slot-name.yml
     with:
       webApp: ${{ inputs.webApp }}
 
   build:
+    name: Build Angular App
     uses: ./.github/workflows/build-angular.yml
     with:
       build-env: ${{ inputs.buildEnv }}
@@ -48,6 +50,7 @@ jobs:
       angular-cli-version: ${{ inputs.angular-cli-version }}
   #Only create slot once name identified
   create-slot:
+    name: Create Slot
     needs: [ create-slot-name ]
     uses: ./.github/workflows/create-slot.yml
     with:
