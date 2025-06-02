@@ -45,7 +45,7 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: azure/cli@v2
         with:
-          azcliversion: 2.63.0 # 2.64 Has breaking changes https://github.com/Azure/cli/issues/165 https://github.com/Azure/azure-cli/issues/29828
+          azcliversion: latest
           # 1st command is a workaround for https://github.com/Azure/azure-cli/issues/25710
           inlineScript: |
             az config set bicep.use_binary_from_path=false
