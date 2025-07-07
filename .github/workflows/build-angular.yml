@@ -17,6 +17,11 @@ on:
         type: string
         description: "Angular CLI version"
         default: "16.2.10"
+      dist-path:
+        required: false
+        type: string
+        description: "Dist file path"
+        default: "dist"
 
 jobs:
   build:
@@ -39,5 +44,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist
+          path: ${{ inputs.dist-path }}
           retention-days: 1
