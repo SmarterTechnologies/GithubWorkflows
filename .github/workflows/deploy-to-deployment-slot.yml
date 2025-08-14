@@ -24,6 +24,11 @@ on:
         type: string
         description: "Angular CLI version"
         default: "16.2.10"
+      dist-path:
+        required: false
+        type: string
+        description: "Dist file path"
+        default: "dist"
     secrets:
       azureCredentialsTestSlots:
         required: true
@@ -48,6 +53,7 @@ jobs:
       build-env: ${{ inputs.buildEnv }}
       node-version: ${{ inputs.node-version }}
       angular-cli-version: ${{ inputs.angular-cli-version }}
+      dist-path: ${{ inputs.dist-path }}
   #Only create slot once name identified
   create-slot:
     name: Create Slot
