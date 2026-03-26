@@ -29,6 +29,11 @@ on:
         type: string
         description: "Dist file path"
         default: "dist"
+      pre-build-command:
+        required: false
+        type: string
+        description: "Optional command to run after npm install and before ng build"
+        default: ''
       deploy-applicationhost-xdt:
         required: false
         type: boolean
@@ -59,6 +64,7 @@ jobs:
       node-version: ${{ inputs.node-version }}
       angular-cli-version: ${{ inputs.angular-cli-version }}
       dist-path: ${{ inputs.dist-path }}
+      pre-build-command: ${{ inputs.pre-build-command }}
   #Only create slot once name identified
   create-slot:
     name: Create Slot
