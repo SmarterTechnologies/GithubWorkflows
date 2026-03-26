@@ -2,6 +2,10 @@ name: Deploy to a Deployment Slot
 on:
   workflow_call:
     inputs:
+      resource-group:
+        description: "The name of the Azure resource group"
+        required: false
+        type: string
       web-app:
         description: "The name of the web app"
         required: true
@@ -10,6 +14,11 @@ on:
         description: "The name of the deployment slot"
         required: false
         type: string
+      deploy-applicationhost-xdt:
+        description: "If true, deploy applicationHost.xdt from the applicationhost-xdt artifact"
+        required: false
+        type: boolean
+        default: false
     secrets:
       token:
         required: true
@@ -24,6 +33,27 @@ jobs:
           name: dist
           path: dist
 
+      - name: Download applicationHost.xdt artifact
+        if: inputs.deploy-applicationhost-xdt
+        uses: actions/download-artifact@v4
+        with:
+          name: applicationhost-xdt
+          path: applicationhost-xdt
+
+      - name: Validate applicationHost.xdt inputs
+        if: inputs.deploy-applicationhost-xdt
+        shell: bash
+        run: |
+          if [ -z "${{ inputs.resource-group }}" ]; then
+            echo "::error::input 'resource-group' is required when 'deploy-applicationhost-xdt' is true."
+            exit 1
+          fi
+
+          if [ ! -f "applicationhost-xdt/applicationHost.xdt" ]; then
+            echo "::error::applicationHost.xdt artifact must contain 'applicationHost.xdt' at its root."
+            exit 1
+          fi
+
       - name: Log into Azure CLI with service principal
         uses: azure/login@v2
         with:
@@ -36,6 +66,24 @@ jobs:
           app-name: ${{ inputs.web-app }}
           slot-name:  ${{ inputs.slot-name }}
           package: dist
+
+      - name: Deploy applicationHost.xdt
+        if: inputs.deploy-applicationhost-xdt
+        shell: bash
+        run: |
+          slot_args=()
+          if [ -n "${{ inputs.slot-name }}" ]; then
+            slot_args+=(--slot "${{ inputs.slot-name }}")
+          fi
+
+          az webapp deploy \
+            --resource-group "${{ inputs.resource-group }}" \
+            --name "${{ inputs.web-app }}" \
+            "${slot_args[@]}" \
+            --src-path "applicationhost-xdt/applicationHost.xdt" \
+            --type static \
+            --target-path "/home/site/applicationHost.xdt" \
+            --restart true
           
        # Sign out of Azure
       - name: Logout of Azure

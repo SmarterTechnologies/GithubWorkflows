@@ -29,6 +29,11 @@ on:
         type: string
         description: "Dist file path"
         default: "dist"
+      deploy-applicationhost-xdt:
+        required: false
+        type: boolean
+        description: "If true, deploy applicationHost.xdt from the applicationhost-xdt artifact"
+        default: false
     secrets:
       azureCredentialsTestSlots:
         required: true
@@ -71,8 +76,10 @@ jobs:
     name: Deploy to deployment slot
     uses: ./.github/workflows/release-angular-deployment-slots.yml
     with:
+      resource-group: ${{ inputs.resourceGroup }}
       web-app: ${{ inputs.webApp }}
       slot-name: ${{ needs.create-slot-name.outputs.slot-name }}
+      deploy-applicationhost-xdt: ${{ inputs.deploy-applicationhost-xdt }}
     secrets:
       token: ${{ secrets.azureCredentialsTestSlots }}
   #Once release completed, comment on jira ticket if one is identified
