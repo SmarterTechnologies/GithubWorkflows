@@ -56,7 +56,7 @@ jobs:
       run: dotnet build "${{ inputs.working-directory }}" --configuration ${{ inputs.configuration }} --no-restore
     - name: Test
       if: ${{ inputs.test }}
-      run: dotnet test
+      run: dotnet test --no-restore
     - name: Publish
       run: dotnet publish "${{ inputs.working-directory }}" --configuration ${{ inputs.configuration }} --no-build --output "${{ env.OUTPUT_PATH }}"
     
