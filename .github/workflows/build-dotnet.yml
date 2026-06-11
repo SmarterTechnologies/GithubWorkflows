@@ -34,6 +34,8 @@ env:
   OUTPUT_PATH: deployment/dist
   NUGET_FEED_NAME: 'visionist-nuget'
   AZURE_ARTIFACTS_FEED_URL: https://pkgs.dev.azure.com/VisionistLtd/Dev/_packaging/visionist-nuget/nuget/v3/index.json
+  VISIONIST_FEED_NAME: 'VisionistLtd'
+  VISIONIST_FEED_URL: https://pkgs.dev.azure.com/VisionistLtd/_packaging/VisionistLtd/nuget/v3/index.json
 
 jobs:
   build:
@@ -51,12 +53,13 @@ jobs:
     - name: Restore
       run: |
         dotnet nuget add source ${{ env.AZURE_ARTIFACTS_FEED_URL }} --name ${{ env.NUGET_FEED_NAME }} --username az --password ${{ secrets.azure-artifacts-pat }} --store-password-in-clear-text
+        dotnet nuget add source ${{ env.VISIONIST_FEED_URL }} --name ${{ env.VISIONIST_FEED_NAME }} --username az --password ${{ secrets.azure-artifacts-pat }} --store-password-in-clear-text
         dotnet restore "${{ inputs.working-directory }}" --locked-mode
     - name: Build
       run: dotnet build "${{ inputs.working-directory }}" --configuration ${{ inputs.configuration }} --no-restore
     - name: Test
       if: ${{ inputs.test }}
-      run: dotnet test --no-restore
+      run: dotnet test
     - name: Publish
       run: dotnet publish "${{ inputs.working-directory }}" --configuration ${{ inputs.configuration }} --no-build --output "${{ env.OUTPUT_PATH }}"
     
