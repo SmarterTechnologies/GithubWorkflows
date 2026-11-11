@@ -20,13 +20,13 @@ on:
         required: true
 jobs:
   delete-slot:
-      runs-on: ubuntu-latest
-      steps:
-        # Login to Azure
+    runs-on: ubuntu-latest
+    steps:
+      # Login to Azure
       - name: Azure Login
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.token }}
       # Delete slot
       - name: Delete deployment slot
-        run: az webapp deployment slot delete --resource-group ${{ inputs.resource-group }}  --name ${{ inputs.web-app }} --slot ${{ inputs.slot-name }}
+        run: az webapp deployment slot delete --resource-group "${{ inputs.resource-group }}" --name "${{ inputs.web-app }}" --slot "${{ inputs.slot-name }}"

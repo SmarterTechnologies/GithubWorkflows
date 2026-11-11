@@ -17,9 +17,9 @@ jobs:
     outputs:
       audit-result: ${{steps.run-audit.outputs.result}}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Node.js version
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
       - name: npm install, build
@@ -33,5 +33,5 @@ jobs:
         shell: bash {0} # has to be used, or auditjs will cause whole job to fail if vulnerabilities are present
         run: |
           result=$(npx auditjs ossi --q --json)
-          oneLineResult=$(echo $result | paste -sd " " -)
-          echo "::set-output name=result::$oneLineResult"
+          oneLineResult=$(printf '%s' "$result" | jq -c .)
+          printf 'result=%s\n' "$oneLineResult" >> "$GITHUB_OUTPUT"

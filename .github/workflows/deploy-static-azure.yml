@@ -72,7 +72,7 @@ jobs:
 
       # Remove the IP from list - if prod branch
       - name: Remove IP from whitelist
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && steps.ip.outputs.ipv4 != ''
         uses: azure/CLI@v2
         with:
           azcliversion: latest
