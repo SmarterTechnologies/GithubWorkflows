@@ -29,20 +29,20 @@ jobs:
 
       # Get IP address - if prod
       - name: Get Public IP
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/hotfix/')
         id: ip
         uses: haythem/public-ip@v1.3
 
       # Login to Azure
       - name: Azure Login
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/hotfix/')
         uses: azure/login@v2
         with:
           creds: ${{ secrets.token }}
 
       # Update security restriction if branch is main/master
       - name: Bicep set security restriction
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/hotfix/')
         uses: azure/cli@v2
         with:
           azcliversion: latest
